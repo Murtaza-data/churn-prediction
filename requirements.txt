@@ -1,0 +1,14 @@
+# Backend (FastAPI) + frontend (Streamlit) share this file, like your other projects.
+# NOTE: xgboost / scikit-learn should match the versions used to train the model
+# in Colab, or unpickling may warn/fail. Confirm with:
+#   import xgboost, sklearn, pandas, numpy; print(their __version__)
+fastapi==0.111.0
+uvicorn==0.30.1
+pydantic==2.7.4
+joblib==1.4.2
+xgboost==2.0.3
+scikit-learn==1.5.0
+pandas==2.2.2
+numpy==1.26.4
+requests==2.32.3
+streamlit==1.36.0
