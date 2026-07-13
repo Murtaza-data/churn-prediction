@@ -14,10 +14,9 @@ regardless of which category a single request happens to contain.
 
 import pandas as pd
 
-# The 8 add-on / phone services counted by `num_services`.
+# The 6 internet add-on services counted by `num_services`
+# (matches the Colab notebook exactly — NOT PhoneService / MultipleLines).
 SERVICE_COLS = [
-    "PhoneService",
-    "MultipleLines",
     "OnlineSecurity",
     "OnlineBackup",
     "DeviceProtection",
@@ -50,10 +49,7 @@ CATEGORICAL_COLS = [
 def add_engineered_features(df: pd.DataFrame) -> pd.DataFrame:
     """Create the 6 engineered features.
 
-    >>> VERIFY THESE FORMULAS AGAINST THE COLAB NOTEBOOK CELL <<<
-    Getting a formula wrong here silently shifts predictions. These are the
-    standard/most-likely definitions given the saved column names; confirm the
-    exact expressions from the notebook and adjust if needed.
+    Verified line-for-line against the Colab training notebook.
     """
     df = df.copy()
 
@@ -66,8 +62,8 @@ def add_engineered_features(df: pd.DataFrame) -> pd.DataFrame:
     # Average monthly spend over the customer's lifetime (guard tenure == 0).
     df["avg_monthly_spend"] = df["TotalCharges"] / df["tenure"].replace(0, 1)
 
-    # How current monthly charge compares to historical average spend.
-    df["charges_ratio"] = df["MonthlyCharges"] / df["avg_monthly_spend"].replace(0, 1)
+    # Monthly charge relative to total charges (+1 guards divide-by-zero).
+    df["charges_ratio"] = df["MonthlyCharges"] / (df["TotalCharges"] + 1)
 
     # New-customer flag (first year).
     df["is_new_customer"] = (df["tenure"] <= 12).astype(int)
@@ -109,5 +105,8 @@ def preprocess(raw: dict, feature_columns: list) -> pd.DataFrame:
 
     # --- align to training columns (reproduces drop_first + fills missing) ---
     df = df.reindex(columns=feature_columns, fill_value=0)
+
+    # One-hot can yield True/False; the model wants plain numbers.
+    df = df.astype(float)
 
     return df
