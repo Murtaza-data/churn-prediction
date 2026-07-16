@@ -8,10 +8,12 @@ End-to-end machine learning project that predicts whether a telecom customer wil
 
 ## 🔗 Live Demo
 
-- **App (Streamlit):** _coming soon_
-- **API docs (FastAPI /docs):** _coming soon_
+- **App (Streamlit):** https://churn-prediction-cdjwvkq826ff47zqfo74zc.streamlit.app/
+- **API docs (FastAPI /docs):** https://churn-prediction-rgju.onrender.com/docs
 
-<!-- Add the Render + Streamlit Cloud URLs here once deployed -->
+> ⚠️ Free-tier note: the API sleeps after ~15 min idle, so the **first** prediction may take ~50 s to wake it, then it's fast.
+
+![Churn prediction app](screenshots/app.png)
 
 ---
 
@@ -80,7 +82,11 @@ Six features were derived from the raw data to give the model more signal:
 Churners are the minority. Two strategies were compared — **SMOTE** (synthetic oversampling) vs **class weighting** (`scale_pos_weight`). Class weighting won on this dataset and was used in the final model.
 
 **3. Comparing multiple models.**
-Three models were benchmarked: **Logistic Regression** (baseline), **Random Forest**, and **XGBoost**. Tree ensembles are state-of-the-art on tabular data, and XGBoost came out ahead.
+Three models were benchmarked — **Logistic Regression** (baseline), **Random Forest**, and **XGBoost** — each under both imbalance strategies. Tree ensembles are state-of-the-art on tabular data, and after tuning XGBoost came out ahead.
+
+![Model comparison](screenshots/model_comparison.png)
+
+*Baseline comparison across imbalance strategies and models (**before** tuning). `XGBoost + scale_pos_weight` was selected, then tuned with `RandomizedSearchCV` → final metrics in [Results](#-results) below. Note the baselines are competitive — tuning is what pushed XGBoost's ROC-AUC from 0.821 to **0.848**.*
 
 **4. Tuning + threshold optimization.**
 XGBoost was tuned with `RandomizedSearchCV`, then the best hyperparameters were **hardcoded** for reproducibility (a searched model can drift between runs — you tune once, then lock it for deployment). The decision threshold was moved from the default 0.50 to **0.55** to better balance precision and recall.
@@ -118,11 +124,11 @@ Final model: **tuned XGBoost** trained on the original imbalanced data with `sca
 
 ## 🧠 Explainability (SHAP)
 
-SHAP was used to open the "black box" and show **why** the model predicts what it does — both globally (top churn drivers overall) and locally (why a specific customer was flagged).
+SHAP was used to open the "black box" and show **why** the model predicts what it does — globally (top churn drivers overall) and locally (why a specific customer was flagged).
 
-Top drivers included the **engineered** features `charges_ratio` and `avg_monthly_spend`, alongside `Contract` type and `tenure` — confirming that the feature engineering added real signal, not noise.
+The strongest drivers were `Contract` type, the **engineered** feature `charges_ratio` (the **#2 driver overall**), `InternetService = Fiber optic`, `PaymentMethod = Electronic check`, and `tenure` — with the engineered `avg_monthly_spend` also contributing. An engineered feature ranking second confirms the feature engineering added real signal, not noise.
 
-<!-- Add SHAP plots to screenshots/ and embed here -->
+![SHAP global feature importance](screenshots/shap_global.png)
 
 ---
 
@@ -138,6 +144,7 @@ churn-prediction/
 ├── preprocessing.py  # replicates the training pipeline (19 raw → 39 features)
 ├── main.py           # FastAPI backend (/predict, /health)
 ├── app.py            # Streamlit frontend
+├── screenshots/      # app + notebook screenshots
 ├── requirements.txt
 └── README.md
 ```
@@ -165,15 +172,6 @@ curl -X POST http://localhost:8000/predict \
 ```json
 {"churn": true, "churn_probability": 0.5527, "threshold": 0.55}
 ```
-
----
-
-## 📸 Screenshots
-
-<!-- Add screenshots to screenshots/ and embed:
-![App](screenshots/app.png)
-![SHAP](screenshots/shap.png)
--->
 
 ---
 
