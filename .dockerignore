@@ -1,0 +1,11 @@
+# Keep the API image small — exclude everything the backend doesn't need.
+__pycache__/
+*.pyc
+.git/
+.gitignore
+README.md
+app.py
+notebooks/
+data/
+screenshots/
+.venv/
