@@ -32,7 +32,7 @@ A key real-world wrinkle: churn data is **imbalanced** (most customers stay). Th
 ```mermaid
 flowchart TD
     A[User] --> B[Streamlit Frontend<br/>app.py]
-    B -->|POST 19 raw fields| C[FastAPI Backend<br/>main.py /predict]
+    B -->|POST 19 raw fields| C[FastAPI Backend · Docker container<br/>main.py /predict]
     C --> D[preprocessing.py]
     D --> D1[Clean: TotalCharges → numeric]
     D1 --> D2[Feature engineering<br/>num_services, charges_ratio, ...]
@@ -50,6 +50,8 @@ flowchart TD
 
 The model is **trained once** (in the notebook) and saved as a `.pkl`. The API **loads** it at startup — it never retrains. All preprocessing is replicated exactly in `preprocessing.py` so a live customer is transformed identically to the training data.
 
+The backend is **containerized with Docker** (`FROM python:3.12-slim`): the image bundles Python 3.12 and the pinned libraries, so it runs identically on any host and removes environment surprises — an earlier non-Docker build had failed because the host defaulted to a too-new Python with no prebuilt wheels. The container is built and served on Render.
+
 ---
 
 ## 🧰 Tech Stack
@@ -61,7 +63,8 @@ The model is **trained once** (in the notebook) and saved as a `.pkl`. The API *
 | **Backend** | **FastAPI**, Uvicorn, Pydantic |
 | **Frontend** | **Streamlit** |
 | **Serialization** | joblib |
-| **Deployment** | Render (backend) · Streamlit Cloud (frontend) · Docker |
+| **Containerization** | **Docker** (`python:3.12-slim`) |
+| **Deployment** | Render (Dockerized backend) · Streamlit Cloud (frontend) |
 
 ---
 
@@ -145,6 +148,8 @@ churn-prediction/
 ├── main.py           # FastAPI backend (/predict, /health)
 ├── app.py            # Streamlit frontend
 ├── screenshots/      # app + notebook screenshots
+├── Dockerfile        # recipe to build the backend image
+├── .dockerignore     # keeps the image small
 ├── requirements.txt
 └── README.md
 ```
@@ -161,6 +166,12 @@ python main.py                      # serves http://localhost:8000  (/docs)
 
 # Frontend (new terminal)
 streamlit run app.py                # set API_URL to the backend URL
+```
+
+**Or run the backend with Docker** (bundles Python 3.12 + all deps):
+```bash
+docker build -t churn-app .
+docker run -p 8000:8000 churn-app   # serves http://localhost:8000  (/docs)
 ```
 
 **Example API call:**
