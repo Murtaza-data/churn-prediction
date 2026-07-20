@@ -9,7 +9,7 @@ End-to-end machine learning project that predicts whether a telecom customer wil
 ## 🔗 Live Demo
 
 - **App (Streamlit):** https://churn-prediction-cdjwvkq826ff47zqfo74zc.streamlit.app/
-- **API docs (FastAPI /docs):** https://churn-prediction-rgju.onrender.com/docs
+- **API docs (FastAPI /docs):** https://churn-docker.onrender.com/docs
 
 > ⚠️ Free-tier note: the API sleeps after ~15 min idle, so the **first** prediction may take ~50 s to wake it, then it's fast.
 
