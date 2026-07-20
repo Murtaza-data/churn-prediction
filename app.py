@@ -11,8 +11,8 @@ import os
 import requests
 import streamlit as st
 
-# Default points at the deployed Render backend; override via env var or the sidebar.
-API_URL = os.environ.get("API_URL", "https://churn-prediction-rgju.onrender.com")
+# Default points at the deployed Dockerized Render backend; override via env var or the sidebar.
+API_URL = os.environ.get("API_URL", "https://churn-docker.onrender.com")
 
 st.set_page_config(page_title="Customer Churn Prediction", page_icon="📉")
 st.title("📉 Customer Churn Prediction")
